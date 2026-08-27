@@ -11,45 +11,45 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;background:var(--bg);color:var(--hud);font-family:Inter,Segoe UI,Arial,sans-serif;touch-action:none}
-  #game-wrap{max-width:900px;margin:6px auto;position:relative}
-  canvas{display:block;background:#0b0b12;border:2px solid #222233;width:100%;height:auto;max-height:68vh}
+
+  /* Container */
+  #container{max-width:720px;margin:8px auto;position:relative}
+  canvas{display:block;background:#071018;border:2px solid #222233;width:100%;height:auto}
 
   /* HUD */
-  #hud{display:flex;justify-content:space-between;align-items:center;padding:8px 6px;max-width:900px;margin:0 auto}
+  #hud{display:flex;justify-content:space-between;align-items:center;padding:8px 6px;max-width:720px;margin:0 auto 6px}
   #level-title{font-weight:700;color:var(--accent)}
   .player-name{color:#bbb}
 
   /* overlays */
-  .overlay{position:fixed;inset:0;background:rgba(4,4,8,0.94);display:none;align-items:center;justify-content:center;z-index:200}
+  .overlay{position:fixed;inset:0;background:rgba(4,4,8,0.94);display:none;align-items:center;justify-content:center;z-index:400}
   .overlay.show{display:flex}
   .panel{background:var(--panel);border:2px solid var(--panel-border);padding:18px;border-radius:12px;color:#fff;max-width:420px;text-align:center}
   .menu-btn{margin-top:10px;padding:10px 14px;border-radius:8px;border:2px solid var(--panel-border);background:transparent;color:var(--hud);cursor:pointer}
   .menu-btn.primary{border-color:var(--accent);color:var(--accent)}
 
   /* Controls container fixed to bottom */
-  #controls{position:fixed;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:18px;align-items:flex-end;z-index:150;padding:0 8px}
+  #controls{position:fixed;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:18px;align-items:flex-end;z-index:350;padding:0 8px}
 
-  /* Joystick */
-  #joystick{width:120px;height:120px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
-  #joystick .joy-ring{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,59,59,0.12),transparent 35%),linear-gradient(135deg,#20203a,#151525);border:3px solid rgba(255,255,255,0.04);box-shadow:0 6px 18px rgba(0,0,0,0.6)}
-  #joystick .joy-inner{width:58px;height:58px;border-radius:50%;background:linear-gradient(180deg,#ff6b6b,#ff3b3b);box-shadow:0 6px 12px rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;transform:translate(0,0)}
-  /* small arrow labels inside ring are hidden - we use canvas arrow indicator */
+  /* Joystick ring with left/right buttons */
+  #joystick{width:140px;height:80px;border-radius:12px;position:relative;display:flex;align-items:center;justify-content:space-between;padding:12px;background:linear-gradient(180deg,#151525,#0f0f18);border:2px solid rgba(255,255,255,0.03)}
+  .joy-btn{width:44px;height:44px;border-radius:8px;background:linear-gradient(180deg,#2a2a3a,#14141a);display:flex;align-items:center;justify-content:center;color:#ddd;font-weight:800;border:2px solid #222;user-select:none}
+  .joy-btn.active{background:linear-gradient(180deg,#ff6b6b,#ff3b3b);color:white}
 
   /* Action buttons */
   .action-buttons{display:flex;flex-direction:column;gap:12px}
   .ctrl-btn{width:84px;height:84px;border-radius:50%;background:linear-gradient(180deg,#222233,#11111a);border:3px solid var(--panel-border);display:flex;align-items:center;justify-content:center;color:var(--hud);font-weight:800;font-size:0.9rem;box-shadow:0 6px 18px rgba(0,0,0,0.5);touch-action:none}
   .ctrl-btn.primary{background:linear-gradient(180deg,#ff6b6b,#ff3b3b);color:#fff}
-  #super-jump{width:62px;height:62px;border-radius:50%;font-size:0.8rem}
+  #super-jump{width:62px;height:62px;border-radius:50%;font-size:0.9rem}
 
-  /* mobile responsive shrink */
   @media (max-width:420px){
-    #joystick{width:98px;height:98px}
-    #joystick .joy-inner{width:48px;height:48px}
+    #joystick{width:120px;height:68px}
+    .joy-btn{width:40px;height:40px}
     .ctrl-btn{width:68px;height:68px}
   }
 
   /* Hit flash overlay */
-  #hit-flash{position:fixed;inset:0;background:#ff0000;opacity:0;pointer-events:none;z-index:180;mix-blend-mode:screen}
+  #hit-flash{position:fixed;inset:0;background:#ff0000;opacity:0;pointer-events:none;z-index:380;mix-blend-mode:screen}
 
   /* Floating text default */
   .float-txt{position:absolute;color:#fff;font-weight:800;text-shadow:0 0 10px rgba(0,0,0,0.6);pointer-events:none}
@@ -61,25 +61,27 @@
     <div class="player-name" id="hud-player">Player: Guest</div>
     <div id="score-hud">Score: 0 · Lives: 3 · Time: 0</div>
   </div>
-  <div id="game-wrap">
-    <canvas id="game" width="900" height="600"></canvas>
+
+  <div id="container">
+    <canvas id="game"></canvas>
   </div>
 
-  <!-- overlays -->
-  <div id="login-overlay" class="overlay show"><div class="panel"><h2>MONKEY PATH</h2><div class="sub">Enter name & phone</div><div style="margin-top:8px;text-align:left"><label class="small">Name</label><input id="login-name" style="width:100%;padding:8px;margin-top:6px;border-radius:6px;background:#0b0b12;border:1px solid #222;color:#fff" maxlength="24"></div><div style="margin-top:8px;text-align:left"><label class="small">Phone (10 digits)</label><input id="login-phone" style="width:100%;padding:8px;margin-top:6px;border-radius:6px;background:#0b0b12;border:1px solid #222;color:#fff" maxlength="10" inputmode="numeric"></div><div id="login-error" style="height:18px;color:#ff7a7a;margin-top:8px"></div><button id="login-start" class="menu-btn primary">START GAME</button></div></div>
+  <!-- overlays: login -> menu -> game -->
+  <div id="login-overlay" class="overlay show"><div class="panel"><h2>MONKEY PATH</h2><p class="sub">Enter a name and phone to continue</p><div style="text-align:left;margin-top:8px"><label>Name</label><input id="login-name" style="width:100%;padding:8px;margin-top:6px;border-radius:6px;background:#0b0b12;border:1px solid #222;color:#fff" maxlength="24"></div><div style="text-align:left;margin-top:8px"><label>Phone (10 digits)</label><input id="login-phone" style="width:100%;padding:8px;margin-top:6px;border-radius:6px;background:#0b0b12;border:1px solid #222;color:#fff" maxlength="10" inputmode="numeric"></div><div id="login-error" style="height:18px;color:#ff7a7a;margin-top:8px"></div><button id="login-start" class="menu-btn primary">Continue</button></div></div>
+
+  <div id="menu-overlay" class="overlay"><div class="panel"><h2>MONKEY PATH</h2><p class="sub">Chase the door. Survive the chaos.</p><div style="margin-top:8px">Best Score: <b id="menu-best">0</b></div><button id="play-btn" class="menu-btn primary">▶ PLAY</button><button id="about-btn" class="menu-btn">ℹ About</button></div></div>
 
   <div id="about-overlay" class="overlay"><div class="panel"><h2>About</h2><p>Monkey Path — HTML5 Canvas Platformer by @ratheegorv</p><button id="about-close" class="menu-btn">Close</button></div></div>
 
   <div id="star-overlay" class="overlay"><div class="panel" id="star-panel"><h2>Level Cleared</h2><div id="star-info"></div></div></div>
 
-  <!-- hit flash -->
   <div id="hit-flash"></div>
 
-  <!-- Controls -->
+  <!-- Controls: joystick with left/right and action buttons -->
   <div id="controls">
     <div id="joystick" aria-hidden="true">
-      <div class="joy-ring"></div>
-      <div class="joy-inner" id="joy-inner">◀︎</div>
+      <div class="joy-btn" id="left-btn">◀</div>
+      <div class="joy-btn" id="right-btn">▶</div>
     </div>
     <div class="action-buttons">
       <div class="ctrl-btn" id="jump-btn">JUMP</div>
@@ -88,231 +90,180 @@
   </div>
 
 <script>
-// Full game implementation (canvas engine, levels, controls, features)
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-let W = canvas.width, H = canvas.height;
-function resizeCanvas(){ const scale = Math.min(window.innerWidth,900)/900; canvas.style.transform = `scale(${scale})`; canvas.style.transformOrigin='top center'; }
-window.addEventListener('resize', resizeCanvas); resizeCanvas();
+/* --- Canvas sizing --- */
+const canvas = document.getElementById('game'); const ctx = canvas.getContext('2d');
+function fitToContainer(){ const maxW = 720; const w = Math.min(window.innerWidth - 20, maxW); const ratio = window.devicePixelRatio || 1; canvas.style.width = w + 'px'; canvas.style.height = Math.round(w * 2/3) + 'px'; canvas.width = Math.round(w * ratio); canvas.height = Math.round((w * 2/3) * ratio); ctx.setTransform(ratio,0,0,ratio,0,0); }
+window.addEventListener('resize', fitToContainer); fitToContainer();
+let W = canvas.width / (window.devicePixelRatio || 1), H = canvas.height / (window.devicePixelRatio || 1);
 
-// Save & player
-const SAVE_KEY = 'monkeyPath_v3_save';
-const PLAYER_KEY = 'monkeyPath_v3_player';
+/* --- Save & profile --- */
+const SAVE_KEY = 'monkeyPath_save_v3'; const PLAYER_KEY = 'monkeyPath_player';
 let save = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {};
 let playerProfile = JSON.parse(localStorage.getItem(PLAYER_KEY) || 'null');
-const hudPlayer = document.getElementById('hud-player');
-if(playerProfile && playerProfile.name) hudPlayer.textContent = 'Player: ' + playerProfile.name;
+const hudPlayer = document.getElementById('hud-player'); if(playerProfile && playerProfile.name) hudPlayer.textContent = 'Player: ' + playerProfile.name;
 
-// Game state
-let currentLevel = 0; let score = 0; let lives = 3; let timeLeft = 60; let playing=false; let lastTime=0; let keys = {};
-let floatingTexts = [];
+/* --- Game state --- */
+let currentLevel = 0, score = 0, lives = 3, timeLeft = 60, playing = false, lastTime = 0, keys = {}, floatingTexts = []; 
 
-// Themes
-const themes = [
-  {id:'jungle', bg:'#0b2a0b', platform:'#2b8a2b', door:'#2b5b2b', accent:'#2ecc71'},
-  {id:'neon', bg:'#0b0414', platform:'#6b4cff', door:'#ff3b3b', accent:'#9b59ff'},
-  {id:'desert', bg:'#201207', platform:'#a86f1f', door:'#9b4a1a', accent:'#f4d35e'},
-  {id:'ice', bg:'#001428', platform:'#8fd3ff', door:'#5fb4ff', accent:'#aee7ff'},
-  {id:'virus', bg:'#0a0710', platform:'#6b1a4b', door:'#ff3b3b', accent:'#ff6b6b'}
-];
+/* --- Themes & characters --- */
+const themes = [ {id:'jungle', bg:'#071814', grid:'#0d3a24', platform:'#2b8a2b', door:'#b33b3b', accent:'#2ecc71'},
+                 {id:'neon', bg:'#070417', grid:'#221040', platform:'#6b4cff', door:'#ff3b3b', accent:'#9b59ff'},
+                 {id:'desert', bg:'#1b0f06', grid:'#3a2a18', platform:'#a86f1f', door:'#9b4a1a', accent:'#f4d35e'},
+                 {id:'ice', bg:'#001428', grid:'#073246', platform:'#8fd3ff', door:'#5fb4ff', accent:'#aee7ff'},
+                 {id:'virus', bg:'#0a0710', grid:'#2b1126', platform:'#6b1a4b', door:'#ff3b3b', accent:'#ff6b6b'} ];
 let currentTheme = themes[0];
-
-// Characters
-const characters = [
-  {id:'sprinter', name:'Sprinter', speed:220, jump:380, special:'dash'},
-  {id:'jumper', name:'Jumper', speed:170, jump:520, special:'higher'},
-  {id:'tank', name:'Tank', speed:140, jump:340, special:'armor'},
-  {id:'ghost', name:'Ghost', speed:180, jump:420, special:'phase'},
-  {id:'monkey', name:'Monkey', speed:200, jump:420, special:'double'}
-];
+const characters = [ {id:'sprinter',name:'Sprinter',speed:220,jump:380},{id:'jumper',name:'Jumper',speed:170,jump:520},{id:'tank',name:'Tank',speed:140,jump:340},{id:'ghost',name:'Ghost',speed:180,jump:420},{id:'monkey',name:'Monkey',speed:200,jump:420} ];
 let playerChar = characters[4];
 
-// Levels: simple data for 17 levels (platforms as x,y,w,h), coins, enemies, door
+/* --- Level definitions (17) --- */
 const levels = [];
-for(let L=0;L<17;L++){
-  const baseY = 520;
-  const spacing = 220;
-  const platforms = [];
-  // create 5 platforms per level at varying heights
-  for(let i=0;i<5;i++){
-    const w = 140 + (i%2)*80;
-    const x = 40 + (i*150) + (L%3)*10;
-    const y = baseY - (i*80) - ((L%4)*10);
-    platforms.push({x,y,w,h:16});
-  }
-  const coins = platforms.map((p,i)=>({x:p.x + p.w/2, y:p.y - 22, taken:false}));
-  const enemies = [{x:200 + (L*10), y:baseY-14,type:'zombie',dir:1}];
-  const door = {x:780, y:baseY-40}
+for(let L=0; L<17; L++){
+  const baseY = 420; const platforms = [];
+  platforms.push({x:20,y:baseY+80,w:220,h:16});
+  platforms.push({x:260,y:baseY+20 + (L%3)*10,w:160,h:16});
+  platforms.push({x:460,y:baseY+80 - (L%2)*20,w:200,h:16});
+  platforms.push({x:120 + (L%4)*10,y:baseY - 60,w:140,h:16});
+  platforms.push({x:640,y:baseY - 10,w:160,h:16});
+  const coins = platforms.map(p=>({x:p.x + p.w/2, y:p.y - 18, taken:false}));
+  const enemies = [{x:320 + (L*6), y:baseY+60, type:'zombie', dir:1}];
+  const door = {x:700, y:baseY - 36};
   levels.push({platforms,coins,enemies,door,time:60 + L*5});
 }
 
-// Player
-let player = {x:80,y:400,w:34,h:44,vx:0,vy:0,onGround:false,canDouble:true,attempts:0};
+/* --- Player --- */
+let player = {x:40, y:200, w:36, h:48, vx:0, vy:0, onGround:false, canDouble:true};
+let platforms = [], coins = [], enemies = [], door = null;
 
-// Entities arrays
-let platforms=[],coins=[],enemies=[],door=null;
-
-// Utility
-function spawnFloatingText(x,y,text,color='#fff'){ floatingTexts.push({x,y,text,color,age:0}); }
-
-// Load level
-function loadLevel(i){ currentLevel=i; const L = levels[i]; platforms = JSON.parse(JSON.stringify(L.platforms)); coins = JSON.parse(JSON.stringify(L.coins)); enemies = JSON.parse(JSON.stringify(L.enemies)); door = JSON.parse(JSON.stringify(L.door)); score = save.bestScore || score; timeLeft = L.time; player.x=80; player.y=300; player.vx=0; player.vy=0; playing=true; document.getElementById('level-title').textContent = `LEVEL ${i+1} / ${levels.length}`; }
-
-// Physics & collisions
-const GRAVITY = 1200;
+/* --- Utility --- */
+function spawnFloatingText(x,y,text,color){ floatingTexts.push({x,y,text,color,age:0}); }
 function rectsOverlap(a,b){ return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h); }
 
-// Input handlers
-window.addEventListener('keydown',e=>{ keys[e.code]=true; if(e.code==='Space'){ tryJump(); } });
-window.addEventListener('keyup',e=>{ keys[e.code]=false; });
+/* --- Load level --- */
+function loadLevel(i){ currentLevel = i; const L = levels[i]; platforms = JSON.parse(JSON.stringify(L.platforms)); coins = JSON.parse(JSON.stringify(L.coins)); enemies = JSON.parse(JSON.stringify(L.enemies)); door = JSON.parse(JSON.stringify(L.door)); timeLeft = L.time; player.x = 40; player.y = 120; player.vx = 0; player.vy = 0; playing = false; // wait for Play
+  document.getElementById('level-title').textContent = `LEVEL ${i+1} / ${levels.length}`; document.getElementById('menu-best').textContent = save.bestScore || 0; }
 
-// Joystick handling
-const joy = document.getElementById('joystick');
-const joyInner = document.getElementById('joy-inner');
-let joyPointerId = null; let joyStart = null; let joyPos = {x:0,y:0};
-function joyStartPointer(e){ e.preventDefault(); const p = getPointer(e); joyPointerId=p.id; joyStart={x:p.x,y:p.y}; }
-function joyMovePointer(e){ if(joyPointerId===null) return; const p = getPointer(e,joyPointerId); if(!p) return; const dx = p.x - (joy.getBoundingClientRect().left + joy.clientWidth/2); const dy = p.y - (joy.getBoundingClientRect().top + joy.clientHeight/2); const max = 34; const nx = Math.max(-max, Math.min(max, dx)); joyInner.style.transform = `translate(${nx}px, ${Math.max(-max,Math.min(max,dy))}px)`; joyPos.x = nx / max; }
-function joyEndPointer(e){ joyPointerId=null; joyInner.style.transform='translate(0,0)'; joyPos={x:0,y:0}; }
-function getPointer(e, id){ if(e instanceof PointerEvent || e.pointerId){ const rect=canvas.getBoundingClientRect(); return {id:e.pointerId,x:e.clientX,y:e.clientY}; } if(e.touches){ for(const t of e.touches){ return {id:t.identifier,x:t.clientX,y:t.clientY}; } } return null; }
-joy.addEventListener('pointerdown',joyStartPointer); window.addEventListener('pointermove',joyMovePointer); window.addEventListener('pointerup',joyEndPointer); window.addEventListener('pointercancel',joyEndPointer);
+/* --- Physics --- */
+const GRAVITY = 1200;
 
-// Buttons
-const jumpBtn = document.getElementById('jump-btn'); const superBtn = document.getElementById('super-jump');
-let jumpHeld=false;
-jumpBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); tryJump(); });
-superBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); trySuperJump(); });
+/* --- Input --- */
+window.addEventListener('keydown', e=>{ keys[e.code] = true; if(e.code === 'Space'){ tryJump(); } });
+window.addEventListener('keyup', e=>{ keys[e.code] = false; });
 
-function tryJump(){ if(player.onGround){ player.vy = -playerChar.jump; player.onGround=false; player.canDouble = (playerChar.special==='double'); sfx('jump'); } else if(player.canDouble){ player.vy = -playerChar.jump*0.85; player.canDouble = false; sfx('jump'); } }
-function trySuperJump(){ // super-jump uses powerup or consumes 1 life (for demo allow always)
-  player.vy = -playerChar.jump * 1.6; sfx('super'); spawnFloatingText(player.x,player.y-20,'SUPER!','#ffd36b'); }
+// Left/Right buttons state
+let leftDown = false, rightDown = false;
+document.getElementById('left-btn').addEventListener('pointerdown', ()=>{ leftDown = true; document.getElementById('left-btn').classList.add('active'); });
+document.getElementById('left-btn').addEventListener('pointerup', ()=>{ leftDown = false; document.getElementById('left-btn').classList.remove('active'); });
+document.getElementById('left-btn').addEventListener('pointercancel', ()=>{ leftDown = false; document.getElementById('left-btn').classList.remove('active'); });
+document.getElementById('right-btn').addEventListener('pointerdown', ()=>{ rightDown = true; document.getElementById('right-btn').classList.add('active'); });
+document.getElementById('right-btn').addEventListener('pointerup', ()=>{ rightDown = false; document.getElementById('right-btn').classList.remove('active'); });
+document.getElementById('right-btn').addEventListener('pointercancel', ()=>{ rightDown = false; document.getElementById('right-btn').classList.remove('active'); });
 
-// Simple SFX using oscillator
-let actx=null; function ensureAudio(){ if(!actx){ try{ actx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
-function sfx(kind){ ensureAudio(); if(!actx) return; const o=actx.createOscillator(), g=actx.createGain(); if(kind==='jump'){ o.type='square'; o.frequency.value=420; g.gain.value=0.06; } else if(kind==='coin'){ o.type='sine'; o.frequency.value=880; g.gain.value=0.08; } else { o.type='sawtooth'; o.frequency.value=120; g.gain.value=0.06; } o.connect(g); g.connect(actx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+0.12); o.stop(actx.currentTime+0.14);
-}
+// Prevent ghost clicks
+['left-btn','right-btn','jump-btn','super-jump'].forEach(id=>{ const el=document.getElementById(id); el.addEventListener('touchstart', e=>e.preventDefault(), {passive:false}); });
 
-// Update loop
-let frame=0; function update(dt){ frame++; // dt in seconds
-  // controls: left/right from keyboard or joystick
-  let moveX = 0; if(keys['ArrowLeft']||keys['KeyA']) moveX = -1; if(keys['ArrowRight']||keys['KeyD']) moveX = 1; if(Math.abs(joyPos.x) > 0.15) moveX = joyPos.x > 0 ? joyPos.x : joyPos.x;
+/* --- Buttons handlers --- */
+document.getElementById('jump-btn').addEventListener('pointerdown', ()=> tryJump());
+document.getElementById('super-jump').addEventListener('pointerdown', ()=> trySuperJump());
+
+function tryJump(){ if(player.onGround){ player.vy = -playerChar.jump; player.onGround=false; player.canDouble = (playerChar.id==='monkey'); sfx('jump'); } else if(player.canDouble){ player.vy = -playerChar.jump * 0.85; player.canDouble = false; sfx('jump'); } }
+function trySuperJump(){ player.vy = -playerChar.jump * 1.6; sfx('super'); spawnFloatingText(player.x, player.y-20, 'SUPER!', '#ffd36b'); }
+
+/* --- SFX --- */
+let actx = null; function ensureAudio(){ if(!actx){ try{ actx = new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function sfx(kind){ ensureAudio(); if(!actx) return; const o=actx.createOscillator(), g=actx.createGain(); if(kind==='jump'){o.type='square';o.frequency.value=420;g.gain.value=0.06;} else if(kind==='coin'){o.type='sine';o.frequency.value=880;g.gain.value=0.08;} else {o.type='sawtooth';o.frequency.value=120;g.gain.value=0.06;} o.connect(g); g.connect(actx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.12); o.stop(actx.currentTime + 0.14); }
+
+/* --- Update & draw --- */
+let frame = 0; function update(dt){ frame++; // movement input
+  let moveX = 0; if(keys['ArrowLeft']||keys['KeyA']|| leftDown) moveX = -1; if(keys['ArrowRight']||keys['KeyD'] || rightDown) moveX = 1;
   player.vx = playerChar.speed * moveX;
-  // Apply gravity
   player.vy += GRAVITY * dt;
-  player.x += player.vx * dt;
-  player.y += player.vy * dt;
-  // World bounds
+  player.x += player.vx * dt; player.y += player.vy * dt;
+  // world bounds
   if(player.x < 0) player.x = 0; if(player.x + player.w > W) player.x = W - player.w;
-  // Collision with platforms
+  // platforms collision
   player.onGround = false;
-  for(const p of platforms){ if(player.vy >= 0){ // only check falling
-      const next = {x:player.x, y:player.y, w:player.w, h:player.h};
-      if(rectsOverlap(next, p)){
-        // simple overlap resolution
-        if(player.y + player.h - player.vy*dt <= p.y){ // landed
-          player.y = p.y - player.h; player.vy = 0; player.onGround = true; player.canDouble = (playerChar.special==='double'); }
-      }
-    }
-  }
+  for(const p of platforms){ if(player.vy >= 0){ const next = {x:player.x, y:player.y, w:player.w, h:player.h}; if(rectsOverlap(next,p)){ if(player.y + player.h - player.vy*dt <= p.y + 1){ player.y = p.y - player.h; player.vy = 0; player.onGround = true; player.canDouble = (playerChar.id==='monkey'); } } } }
   // floor
-  if(player.y + player.h > H - 20){ player.y = H - 20 - player.h; player.vy = 0; player.onGround = true; player.canDouble = (playerChar.special==='double'); }
-
-  // Coins
-  for(const c of coins){ if(!c.taken && Math.hypot((player.x+player.w/2)-c.x,(player.y+player.h/2)-c.y) < 28){ c.taken=true; score += 10; spawnFloatingText(c.x,c.y,'+10','#f4d35e'); sfx('coin'); } }
-
-  // Enemies simple back-and-forth
-  for(const e of enemies){ e.x += (e.dir||1) * 40 * dt; if(e.x < 20) e.dir=1; if(e.x > W-60) e.dir=-1; if(rectsOverlap({x:player.x,y:player.y,w:player.w,h:player.h}, {x:e.x,y:e.y-14,w:36,h:36})){ // hit
-      triggerHit(); }
-  }
-
-  // Door check
-  if(Math.hypot((player.x+player.w/2)-door.x,(player.y+player.h/2)-door.y) < 36){ levelComplete(); }
-
-  // Floating texts age
-  for(const t of floatingTexts) t.age += dt*60; while(floatingTexts.length>50) floatingTexts.shift();
-
-  // Time
-  timeLeft -= dt; if(timeLeft <= 0){ gameOver(); }
-}
-
-function triggerHit(){ lives -= 1; sfx('hit'); triggerHitFlash(); spawnFloatingText(player.x, player.y-20, '-1', '#ff6b6b'); if(lives <= 0) gameOver(); else { // respawn quickly
-  player.x = 80; player.y = 200; player.vx=0; player.vy=0; }
-}
-
-// visual hit flash
-const hitFlashEl = document.getElementById('hit-flash'); let hitFlashTimer=0; function triggerHitFlash(){ hitFlashTimer = 0.28; hitFlashEl.style.opacity = '0.35'; setTimeout(()=>{ hitFlashEl.style.opacity='0'; }, 280); }
-
-function levelComplete(){ playing=false; // compute stars based on remaining time
-  const attempts = player.attempts || 1; const earned = timeLeft > 30 ? 3 : timeLeft > 15 ? 2 : 1; showStarUI(earned); }
-
-function showStarUI(stars){ const overlay = document.getElementById('star-overlay'); const info = document.getElementById('star-info'); info.innerHTML = `Score ${score} · Stars: ${stars}`; overlay.classList.add('show'); setTimeout(()=>{ overlay.classList.remove('show'); if(currentLevel < levels.length-1) loadLevel(currentLevel+1); else { showVictory(); } }, 2000); }
-function showVictory(){ alert('All levels cleared!'); }
-
-function gameOver(){ playing=false; alert('Game Over'); loadLevel(0); lives = 3; score = 0; }
-
-// Draw
-function draw(){ ctx.clearRect(0,0,W,H); // background
-  ctx.fillStyle = currentTheme.bg; ctx.fillRect(0,0,W,H);
-  // draw platforms
-  for(const p of platforms){ ctx.fillStyle = currentTheme.platform || '#444'; ctx.fillRect(p.x,p.y,p.w,p.h); ctx.strokeStyle = '#00000022'; ctx.strokeRect(p.x,p.y,p.w,p.h); }
-  // draw coins
-  for(const c of coins){ if(!c.taken){ ctx.fillStyle='#f4d35e'; ctx.beginPath(); ctx.arc(c.x,c.y,8,0,Math.PI*2); ctx.fill(); } }
+  if(player.y + player.h > H - 10){ player.y = H - 10 - player.h; player.vy = 0; player.onGround = true; player.canDouble = (playerChar.id==='monkey'); }
+  // coins
+  for(const c of coins){ if(!c.taken && Math.hypot((player.x + player.w/2) - c.x, (player.y + player.h/2) - c.y) < 28){ c.taken = true; score += 10; spawnFloatingText(c.x, c.y, '+10', '#f4d35e'); sfx('coin'); } }
   // enemies
-  for(const e of enemies){ ctx.fillStyle = '#8b0000'; ctx.fillRect(e.x,e.y-14,36,36); }
-  // player
-  ctx.fillStyle = '#ffd36b'; ctx.fillRect(player.x,player.y,player.w,player.h);
+  for(const e of enemies){ e.x += (e.dir||1) * 50 * dt; if(e.x < 20) e.dir = 1; if(e.x > W-60) e.dir = -1; if(rectsOverlap({x:player.x,y:player.y,w:player.w,h:player.h}, {x:e.x,y:e.y-20,w:36,h:36})){ triggerHit(); } }
   // door
-  ctx.fillStyle = '#ff3b3b'; ctx.fillRect(door.x-12,door.y-36,24,36);
+  if(Math.hypot((player.x + player.w/2) - door.x, (player.y + player.h/2) - door.y) < 36){ levelComplete(); }
   // floating texts
-  for(const t of floatingTexts){ const a = 1 - (t.age/60); ctx.globalAlpha = Math.max(0, a); ctx.fillStyle = t.color; ctx.font = '18px system-ui'; ctx.fillText(t.text, t.x, t.y - t.age); ctx.globalAlpha = 1; }
-  // HUD numbers
+  for(const t of floatingTexts) t.age += dt * 60; while(floatingTexts.length > 60) floatingTexts.shift();
+  // time
+  timeLeft -= dt; if(timeLeft <= 0) gameOver(); }
+
+function triggerHit(){ lives -= 1; sfx('hit'); triggerHitFlash(); spawnFloatingText(player.x, player.y-20, '-1', '#ff6b6b'); if(lives <= 0) gameOver(); else { player.x = 40; player.y = 120; player.vx = 0; player.vy = 0; } }
+let hitFlashTimer = 0; const hitFlashEl = document.getElementById('hit-flash'); function triggerHitFlash(){ hitFlashTimer = 0.28; hitFlashEl.style.opacity = '0.35'; setTimeout(()=>{ hitFlashEl.style.opacity = '0'; }, 280); }
+
+function levelComplete(){ playing = false; const earned = timeLeft > 30 ? 3 : timeLeft > 15 ? 2 : 1; showStar(earned); }
+function showStar(n){ document.getElementById('star-info').innerHTML = `Score ${score} · Stars: ${n}`; document.getElementById('star-overlay').classList.add('show'); setTimeout(()=>{ document.getElementById('star-overlay').classList.remove('show'); if(currentLevel < levels.length-1) loadLevel(currentLevel+1); else alert('All cleared'); }, 2000); }
+function gameOver(){ playing = false; alert('Game Over'); loadLevel(0); lives = 3; score = 0; }
+
+function drawGrid(){ const gridSize = 24; ctx.strokeStyle = currentTheme.grid; ctx.lineWidth = 1; for(let x = 0; x < W; x += gridSize){ ctx.globalAlpha = (x % (gridSize*4) === 0) ? 0.12 : 0.06; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); } for(let y = 0; y < H; y += gridSize){ ctx.globalAlpha = (y % (gridSize*4) === 0) ? 0.12 : 0.06; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); } ctx.globalAlpha = 1; }
+
+function draw(){ // clear
+  ctx.fillStyle = currentTheme.bg; ctx.fillRect(0,0,W,H);
+  // grid
+  drawGrid();
+  // platforms
+  for(const p of platforms){ ctx.fillStyle = currentTheme.platform; ctx.fillRect(p.x, p.y, p.w, p.h); ctx.strokeStyle = '#00000040'; ctx.strokeRect(p.x, p.y, p.w, p.h); }
+  // coins
+  for(const c of coins){ if(!c.taken){ ctx.fillStyle = '#f4d35e'; ctx.beginPath(); ctx.arc(c.x, c.y, 8, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#c99b2e'; ctx.stroke(); } }
+  // enemies
+  for(const e of enemies){ ctx.fillStyle = '#8b0000'; ctx.fillRect(e.x - 12, e.y - 20, 36, 36); ctx.fillStyle = '#330000'; ctx.fillRect(e.x - 6, e.y - 6, 10, 10); }
+  // door
+  ctx.fillStyle = currentTheme.door; ctx.fillRect(door.x - 18, door.y - 40, 36, 48); ctx.strokeStyle = '#00000088'; ctx.strokeRect(door.x - 18, door.y - 40, 36, 48);
+  // player: monkey with ears & tail
+  const px = player.x, py = player.y, pw = player.w, ph = player.h;
+  // body
+  ctx.fillStyle = '#8b5a2b'; ctx.fillRect(px, py, pw, ph - 8);
+  // head
+  ctx.fillStyle = '#7a4f25'; ctx.fillRect(px + 6, py - 18, pw - 12, 18);
+  // ears
+  ctx.fillStyle = '#6a3f1a'; ctx.beginPath(); ctx.moveTo(px + 8, py - 16); ctx.lineTo(px + 12, py - 26); ctx.lineTo(px + 16, py - 16); ctx.fill(); ctx.beginPath(); ctx.moveTo(px + pw - 8 - 8, py - 16); ctx.lineTo(px + pw - 12, py - 26); ctx.lineTo(px + pw - 16, py - 16); ctx.fill();
+  // tail
+  ctx.strokeStyle = '#6a3f1a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(px + pw, py + ph - 12); ctx.quadraticCurveTo(px + pw + 18, py + ph - 24, px + pw + 6, py + ph - 36); ctx.stroke(); ctx.lineWidth = 1;
+  // eyes
+  ctx.fillStyle = '#000'; ctx.fillRect(px + 10, py - 10, 4, 4); ctx.fillRect(px + pw - 16, py - 10, 4, 4);
+  // floating texts
+  for(const t of floatingTexts){ const a = Math.max(0, 1 - (t.age / 60)); ctx.globalAlpha = a; ctx.fillStyle = t.color; ctx.font = '16px system-ui'; ctx.fillText(t.text, t.x, t.y - t.age); ctx.globalAlpha = 1; }
+  // HUD
   document.getElementById('score-hud').textContent = `Score: ${score} · Lives: ${lives} · Time: ${Math.max(0,Math.floor(timeLeft))}`;
-  // door arrow when offscreen
-  drawDoorArrowIfNeeded();
-}
+  // door arrow if offscreen
+  drawDoorArrow(); }
 
-function drawDoorArrowIfNeeded(){ const cx = player.x + player.w/2, cy = player.y + player.h/2; const dx = door.x - cx, dy = door.y - cy; const dist = Math.hypot(dx,dy); if(dist < 220) return; const ang = Math.atan2(dy,dx); // place on canvas edge
-  const margin = 36; const cos = Math.cos(ang), sin = Math.sin(ang); let tx = cx + cos * 260, ty = cy + sin * 160; ctx.save(); ctx.translate(tx,ty); ctx.rotate(ang); ctx.fillStyle = currentTheme.accent || '#ff3b3b'; ctx.beginPath(); ctx.moveTo(-12,-8); ctx.lineTo(12,0); ctx.lineTo(-12,8); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function drawDoorArrow(){ const cx = player.x + player.w/2, cy = player.y + player.h/2; const dx = door.x - cx, dy = door.y - cy; const dist = Math.hypot(dx,dy); if(dist < 220) return; const ang = Math.atan2(dy,dx); const margin = 28; const cos = Math.cos(ang), sin = Math.sin(ang); const tx = Math.min(Math.max(cx + cos * (W/2 - 20), 20), W-20); const ty = Math.min(Math.max(cy + sin * (H/2 - 20), 20), H-20); ctx.save(); ctx.translate(tx,ty); ctx.rotate(ang); ctx.fillStyle = currentTheme.accent; ctx.beginPath(); ctx.moveTo(-12,-8); ctx.lineTo(12,0); ctx.lineTo(-12,8); ctx.closePath(); ctx.fill(); ctx.restore(); }
 
-// Main loop
-function loop(ts){ if(!lastTime) lastTime = ts; const dt = Math.min(0.05, (ts - lastTime)/1000); lastTime = ts; if(playing) update(dt); draw(); requestAnimationFrame(loop); }
-requestAnimationFrame(loop);
+/* --- Main loop --- */
+let last = 0; function loop(ts){ if(!last) last = ts; const dt = Math.min(0.05, (ts - last)/1000); last = ts; if(playing) update(dt); draw(); requestAnimationFrame(loop); } requestAnimationFrame(loop);
 
-// Start handlers & login
-const loginOverlay = document.getElementById('login-overlay'); document.getElementById('login-start').addEventListener('click', ()=>{
-  const name = document.getElementById('login-name').value.trim(); const phone = document.getElementById('login-phone').value.trim(); if(!name){ document.getElementById('login-error').textContent='Enter name'; return;} if(!/^\d{10}$/.test(phone)){ document.getElementById('login-error').textContent='Phone must be 10 digits'; return;} playerProfile = {name,phone}; localStorage.setItem(PLAYER_KEY, JSON.stringify(playerProfile)); hudPlayer.textContent = 'Player: ' + name; loginOverlay.classList.remove('show'); loadLevel(0);
+/* --- Start flow: login -> menu -> play --- */
+const loginOverlay = document.getElementById('login-overlay'); const menuOverlay = document.getElementById('menu-overlay'); const playBtn = document.getElementById('play-btn');
+document.getElementById('login-start').addEventListener('click', ()=>{
+  const name = document.getElementById('login-name').value.trim(); const phone = document.getElementById('login-phone').value.trim(); if(!name){ document.getElementById('login-error').textContent = 'Enter name'; return; } if(!/^\d{10}$/.test(phone)){ document.getElementById('login-error').textContent = 'Phone must be 10 digits'; return; }
+  playerProfile = {name,phone}; localStorage.setItem(PLAYER_KEY, JSON.stringify(playerProfile)); hudPlayer.textContent = 'Player: ' + name; loginOverlay.classList.remove('show'); menuOverlay.classList.add('show'); loadLevel(0);
 });
 
-// About
-document.getElementById('about-close').addEventListener('click', ()=>{ document.getElementById('about-overlay').classList.remove('show'); });
+playBtn.addEventListener('click', ()=>{ menuOverlay.classList.remove('show'); playing = true; /* start level */ });
+document.getElementById('about-btn').addEventListener('click', ()=>{ menuOverlay.classList.remove('show'); document.getElementById('about-overlay').classList.add('show'); });
+document.getElementById('about-close').addEventListener('click', ()=>{ document.getElementById('about-overlay').classList.remove('show'); menuOverlay.classList.add('show'); });
 
-// Share score
-function shareScore(){ const pname = playerProfile && playerProfile.name ? playerProfile.name : 'Guest'; const text = `Monkey Path\nPlayer: ${pname}\nScore: ${score}\nLevel: ${currentLevel+1}`; if(navigator.share){ navigator.share({title:'Monkey Path', text}).catch(()=>{}); } else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>{ alert('Score copied'); }); } }
+/* --- Door/level helpers --- */
+function levelComplete(){ playing = false; const earned = timeLeft > 30 ? 3 : timeLeft > 15 ? 2 : 1; showStar(earned); }
 
-// Door arrow function already above
-
-// Touch hints: ensure touch events on action buttons prevent defaults
-[jumpBtn, superBtn].forEach(b=>{ b.addEventListener('touchstart',e=>e.preventDefault(),{passive:false}); });
-
-// Ensure keyboard works for left/right and space
-window.addEventListener('keydown', e=>{ if(e.code==='ArrowLeft'||e.code==='ArrowRight') e.preventDefault(); if(e.code==='Space'){ e.preventDefault(); tryJump(); } });
-
-// Save on unload
+/* --- other helpers & finalization --- */
 window.addEventListener('beforeunload', ()=>{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); });
-
-// Register service worker (already present at sw.js)
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
 
-// Ensure canvas size tracked
-function fitCanvas(){ const rect = canvas.getBoundingClientRect(); W = canvas.width; H = canvas.height; }
-fitCanvas(); window.addEventListener('resize', fitCanvas);
-
-// Minimal star & daily implementations kept earlier: daily challenge chooses a level
-function getTodayKey(){ const d=new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
-function pickDaily(){ return (new Date().getDate() % levels.length); }
-
-// Small utility to expose game controls for testing in devtools
+// Expose for debugging
 window._game = { loadLevel, levels, player, platforms, coins, enemies };
 
+// initialize
+loadLevel(0);
 </script>
 </body>
 </html>
